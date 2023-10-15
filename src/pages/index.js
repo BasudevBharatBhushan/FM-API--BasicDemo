@@ -1,7 +1,148 @@
-import React from "react";
+import React, { useState } from "react";
 import Head from "next/head";
+import Card from "@/components/Card";
+import Table from "@/components/Table";
+import Loader from "@/components/Loader.js";
+import {
+  getLastnDaysInvoices_odata,
+  getLowestSumInvoice_odata,
+  getHighestSumInvoice_odata,
+  getCustomeDateInvoice_odata,
+  getCustomSumInvoice_odata,
+  getFilterInvoice_odata,
+} from "./api/fm-odata-api/index.js";
+import {
+  getLastnDaysInvoices_data,
+  getLowestSumInvoice_data,
+  getHighestSumInvoice_data,
+  getCustomDateInvoice_data,
+  getCustomSumInvoice_data,
+  getFilterInvoice_data,
+} from "./api/fm-data-api/index.js";
 
 const Home = () => {
+  const [invoicesData, setInvoicesData] = useState([]);
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState(null);
+  const [formData, setFormData] = useState({
+    ViewInvoices_Days: 10,
+    ViewCustomDateInvoice_From: "2023-01-01",
+    ViewCustomDateInvoice_To: "2023-12-31",
+    ViewCustomSumInvoice_GreaterThan: 1000,
+    ViewCustomSumInvoice_LessThan: 100000,
+    FilterInvoice_Name: "",
+    FilterInvoice_ToDate: "",
+    FilterInvoice_FromDate: "",
+    FilterInvoice_Status: "",
+    token: "",
+  });
+
+  const handleViewInvoices = async (viewInvoicesFunction) => {
+    try {
+      setIsLoading(true);
+      const response = await viewInvoicesFunction(
+        formData.ViewInvoices_Days,
+        formData.token
+      );
+      setInvoicesData(response.props.data);
+      setError("");
+    } catch (error) {
+      console.error("Error fetching invoices data:", error);
+      setError(error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleHighestInvoiceData = async (viewHighestSumInvoiceFunction) => {
+    try {
+      setIsLoading(true);
+      const response = await viewHighestSumInvoiceFunction(formData.token);
+      setInvoicesData(response.props.data);
+      setError("");
+    } catch (error) {
+      console.error("Error fetching invoices data:", error);
+      setError(error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleLowestInvoiceData = async (viewLowestSumInvoiceFunction) => {
+    try {
+      setIsLoading(true);
+      const response = await viewLowestSumInvoiceFunction(formData.token);
+      setInvoicesData(response.props.data);
+      setError("");
+    } catch (error) {
+      console.error("Error fetching invoices data:", error);
+      setError(error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleCustomDateInvoiceData = async (viewCustomDateInvoiceFunction) => {
+    try {
+      setIsLoading(true);
+      const response = await viewCustomDateInvoiceFunction(
+        formData.ViewCustomDateInvoice_From,
+        formData.ViewCustomDateInvoice_To,
+        formData.token
+      );
+      setInvoicesData(response.props.data);
+      setError("");
+    } catch (error) {
+      console.error("Error fetching invoices data:", error);
+      setError(error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleCustomSumInvoiceData = async (viewCustomSumInvoiceFunction) => {
+    try {
+      setIsLoading(true);
+      const response = await viewCustomSumInvoiceFunction(
+        formData.ViewCustomSumInvoice_GreaterThan,
+        formData.ViewCustomSumInvoice_LessThan,
+        formData.token
+      );
+      setInvoicesData(response.props.data);
+      setError("");
+    } catch (error) {
+      console.error("Error fetching invoices data:", error);
+      setError(error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleFilterInvoiceData = async (viewFilterInvoiceFunction) => {
+    try {
+      setIsLoading(true);
+      const response = await viewFilterInvoiceFunction(
+        formData.FilterInvoice_Name,
+        formData.FilterInvoice_Status,
+        formData.FilterInvoice_FromDate,
+        formData.FilterInvoice_ToDate,
+        formData.token
+      );
+      setInvoicesData(response.props.data);
+      setError("");
+    } catch (error) {
+      console.error("Error fetching invoices data:", error);
+      setError(error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleInputChange = (e) => {
+    const { name, value } = e.target;
+    setFormData({ ...formData, [name]: value });
+  };
+
   return (
     <>
       <Head>
@@ -11,8 +152,70 @@ const Home = () => {
         <link rel="icon" href="/favicon.ico" />
       </Head>
       <main>
-        <div className="flex bg-black text-yellow-50">
-          Hello Next JS Homepage
+        <div className="flex flex-col justify-around">
+          <p className="self-center m-2 text-xl font-bold">FILEMAKER-API</p>
+
+          <div className="functionaldiv flex flex-row gap-1 justify-around p-6 border border-gray-300 rounded-lg shadow-lg">
+            <Card
+              heading="FM Data API"
+              showTokenField={true}
+              viewInvoicesFunction={() =>
+                handleViewInvoices(getLastnDaysInvoices_data)
+              }
+              onInputChange={handleInputChange}
+              viewHighestSumInvoiceFunction={() =>
+                handleHighestInvoiceData(getHighestSumInvoice_data)
+              }
+              viewLowestSumInvoiceFunction={() =>
+                handleLowestInvoiceData(getLowestSumInvoice_data)
+              }
+              viewCustomDateInvoiceFunction={() =>
+                handleCustomDateInvoiceData(getCustomDateInvoice_data)
+              }
+              viewCustomSumInvoiceFunction={() =>
+                handleCustomSumInvoiceData(getCustomSumInvoice_data)
+              }
+              viewfilterInvoiceFunction={() =>
+                handleFilterInvoiceData(getFilterInvoice_data)
+              }
+            />
+            <Card
+              heading="FM O-Data API"
+              viewInvoicesFunction={() =>
+                handleViewInvoices(getLastnDaysInvoices_odata)
+              }
+              onInputChange={handleInputChange}
+              viewHighestSumInvoiceFunction={() =>
+                handleHighestInvoiceData(getHighestSumInvoice_odata)
+              }
+              viewLowestSumInvoiceFunction={() =>
+                handleLowestInvoiceData(getLowestSumInvoice_odata)
+              }
+              viewCustomDateInvoiceFunction={() =>
+                handleCustomDateInvoiceData(getCustomeDateInvoice_odata)
+              }
+              viewCustomSumInvoiceFunction={() =>
+                handleCustomSumInvoiceData(getCustomSumInvoice_odata)
+              }
+              viewfilterInvoiceFunction={() =>
+                handleFilterInvoiceData(getFilterInvoice_odata)
+              }
+            />
+          </div>
+
+          <div className="table-container ">
+            {isLoading ? (
+              <Loader />
+            ) : error ? (
+              <div className="p-2 bg-red-500 rounded-md text-white font-semibold">
+                <p>Message: {JSON.stringify(error.message)}</p>
+                <p>Error: {JSON.stringify(error.error)}</p>
+                <p>Detail: {JSON.stringify(error.detail)}</p>
+              </div>
+            ) : (
+              <Table data={invoicesData} />
+            )}
+          </div>
         </div>
       </main>
     </>
