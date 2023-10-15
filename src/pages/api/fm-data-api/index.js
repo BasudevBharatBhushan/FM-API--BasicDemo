@@ -280,11 +280,11 @@ export const getFilterInvoice_data = async (
     Authorization: "Basic RGV2ZWxvcGVyOmFkbWluYml6",
   };
 
-  FromDate = new Date(FromDate);
-  ToDate = new Date(ToDate);
+  FromDate = FromDate ? formatDate(new Date(FromDate)) : null;
+  ToDate = ToDate ? formatDate(new Date(ToDate)) : null;
+  const QueryDate = FromDate && ToDate ? `${FromDate}...${ToDate}` : "*";
 
-  const FormattedFromDate = formatDate(FromDate);
-  const FormattedToDate = formatDate(ToDate);
+  console.log(QueryDate);
 
   const requestData = {
     fmServer: "208.85.249.144",
@@ -295,9 +295,9 @@ export const getFilterInvoice_data = async (
       dataformats: 0,
       query: [
         {
-          InvoiceDate: `${FormattedFromDate}...${FormattedToDate}` || "*",
-          ContactName: `*${ContactName}*` || "*",
-          InvoiceStatus: InvoiceStatus || "*",
+          InvoiceDate: QueryDate,
+          ContactName: ContactName,
+          InvoiceStatus: InvoiceStatus,
         },
       ],
       // sort: [{ fieldName: "Total", sortOrder: "ascend" }],
@@ -322,7 +322,7 @@ export const getFilterInvoice_data = async (
   } catch (error) {
     console.error("Error fetching data:", error);
     throw {
-      statusCode: error.response?.status || 500, // Use the status code from the response, or 500 as default
+      statusCode: error.response?.status || 500,
       message: "Error fetching data. Please try again later.",
       error: error.message || "Unknown Error",
       detail: error.name || "Unknown",
